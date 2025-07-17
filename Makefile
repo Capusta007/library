@@ -1,7 +1,7 @@
 .PHONY: build run down restart
 
 build:
-	mvnw clean package
+	mvnw -DskipTests clean package
 	docker compose up --build -d
 
 run:

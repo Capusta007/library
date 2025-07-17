@@ -15,10 +15,10 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   app:
-    image: library-app
-    container_name: library-app
+    image: booking
+    container_name: booking
     build:
-      context: .
+      context: ./booking
       dockerfile: Dockerfile
     depends_on:
       - postgres
@@ -28,7 +28,6 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/library
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-
 
 volumes:
   pgdata:
