@@ -34,14 +34,14 @@ public class BookController {
     }
 
     @PutMapping("/{id}")
-    public BookResponseDto updateBook(@PathVariable Long id, @RequestBody @Valid BookRequestDto dto) {
+    public BookResponseDto updateBook(@PathVariable(name = "id") Long id, @RequestBody @Valid BookRequestDto dto) {
         Book book = bookMapper.toEntity(dto);
         Book updatedBook = bookService.updateBook(id, book);
         return bookMapper.toDto(updatedBook);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBook(@PathVariable Long id) {
+    public void deleteBook(@PathVariable(name = "id") Long id) {
         bookService.deleteBookById(id);
     }
 
