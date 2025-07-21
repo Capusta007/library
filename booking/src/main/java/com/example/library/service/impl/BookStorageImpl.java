@@ -1,45 +1,46 @@
 package com.example.library.service.impl;
 
-import com.example.library.entity.Book;
+import com.example.library.entity.BookEntity;
 import com.example.library.repository.BookRepository;
-import com.example.library.service.BookService;
+import com.example.library.service.BookStorage;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
-
-@Service
+@Component
 @RequiredArgsConstructor
-public class BookServiceImpl implements BookService {
+public class BookStorageImpl implements BookStorage {
     private final BookRepository repository;
 
     @Override
-    public List<Book> getAllBooks() {
+    public List<BookEntity> getAllBooks() {
         return repository.findAll();
     }
 
     @Override
-    public Book getBookById(Long id) throws EntityNotFoundException {
-        return repository.findById(id).orElseThrow(EntityNotFoundException::new);
+    public Optional<BookEntity> getBookById(Long id) {
+        return repository.findById(id);
     }
 
     @Override
-    public Book getBookByIsbn(String isbn) throws EntityNotFoundException {
-        return repository.findBookByIsbn(isbn).orElseThrow(EntityNotFoundException::new);
+    public Optional<BookEntity> getBookByIsbn(String isbn) {
+        return repository.findBookByIsbn(isbn);
     }
 
     @Override
-    public Book createBook(Book book) {
-        if(repository.existsBookByIsbn(book.getIsbn())) {
+    public BookEntity createBook(BookEntity book) {
+        if (repository.existsBookByIsbn(book.getIsbn())) {
             throw new IllegalArgumentException("A book with this ISBN already exists");
         }
         return repository.save(book);
     }
 
     @Override
-    public Book updateBook(Long id, Book updatedBook) throws EntityNotFoundException{
+    public BookEntity updateBook(Long id, BookEntity updatedBook) throws EntityNotFoundException {
         return repository.findById(id)
                 .map(existing -> {
                     existing.setTitle(updatedBook.getTitle());

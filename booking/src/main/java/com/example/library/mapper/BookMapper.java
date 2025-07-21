@@ -2,16 +2,16 @@ package com.example.library.mapper;
 
 import com.example.library.dto.BookRequestDto;
 import com.example.library.dto.BookResponseDto;
-import com.example.library.entity.Book;
+import com.example.library.entity.BookEntity;
 import org.mapstruct.Mapper;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface BookMapper {
-    Book toEntity(BookRequestDto dto);
+    BookEntity toEntity(BookRequestDto dto);
 
-    BookResponseDto toDto(Book book);
+    BookResponseDto toDto(BookEntity book);
 
-    List<BookResponseDto> toDtoList(List<Book> books);
+    List<BookResponseDto> toDtoList(List<BookEntity> books);
 }
