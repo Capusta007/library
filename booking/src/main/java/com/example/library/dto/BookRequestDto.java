@@ -1,12 +1,13 @@
 package com.example.library.dto;
 
-import lombok.Data;
+import lombok.Builder;
 
-@Data
-public class BookRequestDto {
-    private String isbn;
-    private String title;
-    private String genre;
-    private String description;
-    private String author;
+@Builder(toBuilder = true)
+public record BookRequestDto(
+        String isbn,
+        String title,
+        String genre,
+        String description,
+        String author
+) {
 }
