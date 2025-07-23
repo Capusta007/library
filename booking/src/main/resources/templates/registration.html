@@ -13,16 +13,19 @@
             <div class="card">
                 <div class="card-body">
                     <h2 class="card-title text-center mb-4">Регистрация</h2>
-                    <form method="post">
+                    <div class="alert alert-danger" th:if="${param.error}">
+                        Юзер с таким именем уже существует
+                    </div>
+                    <form method="post" th:action="@{/registration}" th:object="${user}">
                         <div class="mb-3">
-                            <label for="name" class="form-label">Имя</label>
-                            <input type="text" class="form-control" id="name" required>
+                            <label class="form-label" for="name">Имя</label>
+                            <input class="form-control" id="name" required th:field="*{username}" type="text">
                         </div>
                         <div class="mb-3">
-                            <label for="password" class="form-label">Пароль</label>
-                            <input type="password" class="form-control" id="password" required>
+                            <label class="form-label" for="password">Пароль</label>
+                            <input class="form-control" id="password" required th:field="*{password}" type="password">
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+                        <button class="btn btn-primary w-100" type="submit">Зарегистрироваться</button>
                     </form>
                     <div class="text-center mt-3">
                         <p>Уже есть аккаунт? <a th:href="@{/login}">Войти</a></p>

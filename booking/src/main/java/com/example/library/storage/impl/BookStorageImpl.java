@@ -1,8 +1,11 @@
-package com.example.library.service.impl;
+package com.example.library.storage.impl;
 
 import com.example.library.entity.BookEntity;
+import com.example.library.mapper.BookMapper;
+import com.example.library.model.Book;
 import com.example.library.repository.BookRepository;
-import com.example.library.service.BookStorage;
+import com.example.library.storage.BookStorage;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -14,32 +17,34 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BookStorageImpl implements BookStorage {
     private final BookRepository repository;
+    private final BookMapper bookMapper;
 
     @Override
-    public List<BookEntity> getAllBooks() {
-        return repository.findAll();
+    public List<Book> getAllBooks() {
+        return repository.findAll().stream().map(bookMapper::map).toList();
     }
 
     @Override
-    public Optional<BookEntity> getBookById(Long id) {
-        return repository.findById(id);
+    public Optional<Book> getBookById(Long id) {
+        return repository.findById(id).map(bookMapper::map);
     }
 
     @Override
-    public Optional<BookEntity> getBookByIsbn(String isbn) {
-        return repository.findBookByIsbn(isbn);
+    public Optional<Book> getBookByIsbn(String isbn) {
+        return repository.findBookByIsbn(isbn).map(bookMapper::map);
     }
 
     @Override
-    public BookEntity createBook(BookEntity book) {
+    public Book createBook(Book book) throws EntityExistsException {
         if (repository.existsBookByIsbn(book.getIsbn())) {
-            throw new IllegalArgumentException("A book with this ISBN already exists");
+            throw new EntityExistsException("A book with this ISBN already exists");
         }
-        return repository.save(book);
+        BookEntity bookEntity = bookMapper.toEntity(book);
+        return bookMapper.map(repository.save(bookEntity));
     }
 
     @Override
-    public BookEntity updateBook(Long id, BookEntity updatedBook) throws EntityNotFoundException {
+    public Optional<Book> updateBook(Long id, Book updatedBook) throws EntityNotFoundException {
         return repository.findById(id)
                 .map(existing -> {
                     existing.setTitle(updatedBook.getTitle());
@@ -47,9 +52,8 @@ public class BookStorageImpl implements BookStorage {
                     existing.setIsbn(updatedBook.getIsbn());
                     existing.setDescription(updatedBook.getDescription());
                     existing.setGenre(updatedBook.getGenre());
-                    return repository.save(existing);
-                })
-                .orElseThrow(() -> new EntityNotFoundException("Book with id " + id + " not found"));
+                    return bookMapper.map(repository.save(existing));
+                });
     }
 
     @Override

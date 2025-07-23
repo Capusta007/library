@@ -2,9 +2,10 @@ package com.example.library.controller;
 
 import com.example.library.dto.BookRequestDto;
 import com.example.library.dto.BookResponseDto;
-import com.example.library.entity.BookEntity;
 import com.example.library.mapper.BookMapper;
-import com.example.library.service.BookStorage;
+import com.example.library.model.Book;
+import com.example.library.storage.BookStorage;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,33 +32,37 @@ public class BookController {
 
     @GetMapping
     public List<BookResponseDto> getAllBooks() {
-        List<BookEntity> books = bookStorage.getAllBooks();
+        List<Book> books = bookStorage.getAllBooks();
         return bookMapper.toDtoList(books);
     }
 
     @GetMapping("/{id}")
     public BookResponseDto getBookById(@PathVariable(name = "id") long id) {
-        BookEntity book = bookStorage.getBookById(id).orElseThrow(EntityNotFoundException::new);
+        Book book = bookStorage.getBookById(id).orElseThrow(() -> new EntityNotFoundException("No book found with id " + id));
         return bookMapper.toDto(book);
     }
 
     @GetMapping("/isbn/{isbn}")
     public BookResponseDto getBookByIsbn(@PathVariable(name = "isbn") String isbn) {
-        BookEntity book = bookStorage.getBookByIsbn(isbn).orElseThrow(EntityNotFoundException::new);
+        Book book = bookStorage.getBookByIsbn(isbn).orElseThrow(() -> new EntityNotFoundException("No book found with isbn " + isbn));
         return bookMapper.toDto(book);
     }
 
     @PostMapping
     public BookResponseDto createBook(@RequestBody @Valid BookRequestDto dto) {
-        BookEntity book = bookMapper.toEntity(dto);
-        BookEntity savedBook = bookStorage.createBook(book);
-        return bookMapper.toDto(savedBook);
+        try {
+            Book book = bookMapper.map(dto);
+            Book savedBook = bookStorage.createBook(book);
+            return bookMapper.toDto(savedBook);
+        } catch (EntityExistsException e) {
+            throw new EntityExistsException("Book already exists");
+        }
     }
 
     @PutMapping("/{id}")
     public BookResponseDto updateBook(@PathVariable(name = "id") Long id, @RequestBody @Valid BookRequestDto dto) {
-        BookEntity book = bookMapper.toEntity(dto);
-        BookEntity updatedBook = bookStorage.updateBook(id, book);
+        Book book = bookMapper.map(dto);
+        Book updatedBook = bookStorage.updateBook(id, book).orElseThrow(() -> new EntityNotFoundException("No book found with id " + id));
         return bookMapper.toDto(updatedBook);
     }
 
@@ -72,9 +77,9 @@ public class BookController {
         return ex.getMessage();
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
+    @ExceptionHandler(EntityExistsException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String handleIllegalArgumentException(IllegalArgumentException ex) {
+    public String handleIllegalArgumentException(EntityExistsException ex) {
         return ex.getMessage();
     }
 }

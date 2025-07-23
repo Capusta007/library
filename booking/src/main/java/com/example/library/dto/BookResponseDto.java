@@ -11,4 +11,5 @@ public record BookResponseDto(
         String genre,
         String description,
         String author
-) {}
+) {
+}
