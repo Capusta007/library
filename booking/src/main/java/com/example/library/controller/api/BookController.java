@@ -1,4 +1,4 @@
-package com.example.library.controller;
+package com.example.library.controller.api;
 
 import com.example.library.dto.BookRequestDto;
 import com.example.library.dto.BookResponseDto;

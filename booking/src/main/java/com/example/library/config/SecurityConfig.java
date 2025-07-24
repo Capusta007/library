@@ -1,8 +1,10 @@
 package com.example.library.config;
 
 import com.example.library.service.AppUserDetailService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -15,15 +17,19 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
-    AppUserDetailService appUserDetailService;
+    private final AppUserDetailService appUserDetailService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/registration", "/login").anonymous()
-                        .requestMatchers("/api/books").hasRole("ADMIN") //TODO: УБЕРИ ПОТОМ
+                        .requestMatchers(HttpMethod.GET, SecurityConstants.BOOKS_API).hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, SecurityConstants.BOOKS_API).hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, SecurityConstants.BOOKS_API).hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, SecurityConstants.BOOKS_API).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
